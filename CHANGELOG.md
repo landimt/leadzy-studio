@@ -45,6 +45,14 @@ libx264|h264_videotoolbox|h264_nvenc`: the final quality and encoder the
 
 ### Changed
 
+- The agent skill is now a short router and the per-project guide
+  (`edit/agent/leadzy-studio.md`) is the single contract. The guide gains a
+  complete command reference, audio tracks (music, effects, narration),
+  canvas, the layer and overlay fields it had left out, and what QA and
+  captions do not cover; it points at the current `/hyperframes` skill
+  instead of skills HyperFrames has retired. A test now fails when a command
+  or flag in `studio --help` is missing from the guide. Run `studio
+install-skill` again to refresh the installed copy.
 - Previews (and the player's program render) read video from the 540p
   proxy the player already uses whenever it is fresh; audio still comes
   from the original, and the final never touches the proxy. `studio open`
