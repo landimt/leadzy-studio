@@ -88,7 +88,10 @@ describe('subtitle graphics', () => {
     expect((await renderSubtitleGraphics(projectDir, input)).ok).toBe(true);
     const after = await readFile(join(projectDir, 'edit/cache/subtitles/vector-test', cueName));
     expect(after).toEqual(before);
-  });
+    // The first render loads the native rasterizer cold. Hosted macOS runners
+    // have taken 2.6s to 5.5s for it, so the 5s default expires on the machine
+    // rather than on a defect.
+  }, 20_000);
 
   it('bounds obsolete content-addressed caption sets while retaining the active one', async () => {
     projectDir = await mkdtemp(join(tmpdir(), 'leadzy-subtitle-cache-'));
