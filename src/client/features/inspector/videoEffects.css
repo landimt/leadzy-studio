@@ -1,0 +1,76 @@
+.video-effects-inspector {
+  border-top: 1px solid var(--line);
+  margin-top: 14px;
+  padding-top: 14px;
+}
+.video-effects-inspector header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.video-effects-inspector header small {
+  display: block;
+  color: var(--ink-soft);
+  margin-top: 4px;
+}
+.video-effects-inspector fieldset {
+  border: 0;
+  margin: 12px 0 0;
+  padding: 0;
+  min-width: 0;
+}
+.video-effects-inspector p {
+  font-size: 11px;
+  color: var(--ink-soft);
+  line-height: 1.5;
+  margin: 8px 0 14px;
+}
+.effects-scope[data-slot='tabs-list'] {
+  display: flex;
+  width: 100%;
+  height: 32px;
+  background: var(--paper);
+  padding: 3px;
+}
+.effects-scope [data-slot='tabs-trigger'] {
+  font-size: 11px;
+}
+.effects-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 16px 0 12px;
+}
+.effects-heading label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+}
+.effects-field {
+  display: grid;
+  gap: 7px;
+  font-size: 12px;
+  margin: 12px 0;
+}
+.effects-field-label {
+  display: flex;
+  justify-content: space-between;
+}
+.effects-field output {
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-soft);
+}
+.effects-field [data-slot='slider'] {
+  min-height: 24px;
+}
+.effects-reset {
+  width: 100%;
+  font-size: 11px;
+  color: var(--muted-foreground);
+}
+.effects-proof {
+  border-top: 1px solid var(--line);
+  padding-top: 10px;
+}

@@ -1,0 +1,17 @@
+/* Leadzy brand tokens — mirrored from leadzy-website-v4/src/app/globals.css.
+   Overlays and lower thirds MUST use these; never invent a palette. */
+:root {
+  --leadzy-pink: #e5388c;
+  --leadzy-pink-soft: #fce1ec;
+  --leadzy-pink-deep: #8e1b4e;
+  --leadzy-coral: #f5764e;
+  --leadzy-ai: #7c5cff;
+  --leadzy-success: #27b23c;
+  --leadzy-warn: #f99e00;
+  --leadzy-danger: #ef345a;
+  --leadzy-ink: #101010;
+  --leadzy-ink-soft: #5a1730;
+  --leadzy-paper: #faf8f5;
+  --leadzy-font-brand: 'Inter', -apple-system, sans-serif;
+  --leadzy-font-data: 'Space Mono', ui-monospace, monospace;
+}

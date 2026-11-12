@@ -1,0 +1,124 @@
+{
+  "name": "leadzy-studio",
+  "productName": "Leadzy Studio",
+  "version": "0.1.0",
+  "private": true,
+  "author": "Leadzy",
+  "license": "AGPL-3.0-only",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/landimt/leadzy-studio.git"
+  },
+  "homepage": "https://github.com/landimt/leadzy-studio#readme",
+  "bugs": {
+    "url": "https://github.com/landimt/leadzy-studio/issues"
+  },
+  "packageManager": "pnpm@10.29.1",
+  "description": "Local, transcript-first, agent-native video editor for ads and reels",
+  "type": "module",
+  "main": "electron/main.mjs",
+  "bin": {
+    "studio": "bin/studio.js"
+  },
+  "engines": {
+    "node": ">=22 <23"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "fs-xattr",
+      "macos-alias"
+    ],
+    "overrides": {
+      "nanoid@>=3 <3.3.18": "3.3.18",
+      "tar@<7.5.21": "7.5.21",
+      "@xmldom/xmldom@<0.9.12": "0.9.12",
+      "fast-uri@>=3 <3.1.8": "3.1.8",
+      "fast-uri@>=4 <4.1.5": "4.1.5",
+      "appdmg>image-size": "2.0.3",
+      "tmp@<0.2.7": "0.2.7",
+      "fflate@>=0.7 <0.7.5": "0.7.5"
+    },
+    "ignoredBuiltDependencies": [
+      "better-sqlite3"
+    ],
+    "patchedDependencies": {
+      "appdmg@0.6.6": "patches/appdmg@0.6.6.patch"
+    }
+  },
+  "scripts": {
+    "dev": "tsx src/cli/main.ts",
+    "studio": "tsx src/cli/main.ts",
+    "doctor": "pnpm build:node && node dist/node/cli/main.js doctor",
+    "media:setup": "node scripts/setup-media-tools.mjs",
+    "build": "pnpm build:node && pnpm build:client",
+    "build:node": "tsc -p tsconfig.node.json",
+    "build:client": "vite build",
+    "icons:build": "node scripts/build-logo.mjs",
+    "desktop:icons": "pnpm icons:build",
+    "desktop:start": "pnpm icons:build && pnpm build && electron-forge start",
+    "desktop:prepare": "node scripts/prepare-desktop-resources.mjs",
+    "desktop:prepare-dmg": "node scripts/setup-dmg-native.mjs",
+    "desktop:package": "node scripts/desktop-build.mjs package",
+    "desktop:make": "node scripts/desktop-build.mjs make",
+    "desktop:publish-build": "node scripts/desktop-build.mjs publish --dry-run",
+    "desktop:publish-upload": "node scripts/desktop-build.mjs publish --from-dry-run",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint src",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "example:build": "tsx example/build-example.ts",
+    "desktop:package:win": "node scripts/desktop-build.mjs package --platform=win32 --arch=x64",
+    "desktop:make:win": "node scripts/desktop-build.mjs make --platform=win32 --arch=x64"
+  },
+  "dependencies": {
+    "@fastify/static": "^10.1.5",
+    "@fontsource/arimo": "5.3.0",
+    "@fontsource/inter": "5.3.0",
+    "@resvg/resvg-js": "2.6.2",
+    "@shuding/opentype.js": "1.4.0-beta.0",
+    "better-sqlite3": "^13.0.3",
+    "chokidar": "^5.0.0",
+    "commander": "^15.0.0",
+    "electron-squirrel-startup": "1.0.1",
+    "execa": "^10.0.1",
+    "fastify": "^5.12.5",
+    "hyperframes": "0.8.80",
+    "satori": "0.33.5",
+    "update-electron-app": "^3.3.0",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@electron-forge/cli": "7.11.2",
+    "@electron-forge/maker-dmg": "7.11.2",
+    "@electron-forge/maker-squirrel": "7.11.2",
+    "@electron-forge/maker-zip": "7.11.2",
+    "@electron-forge/plugin-auto-unpack-natives": "7.11.2",
+    "@electron-forge/publisher-github": "7.11.2",
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/better-sqlite3": "^9.6.0",
+    "@types/node": "^26.6.3",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.1",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "electron": "44.4.5",
+    "eslint": "^10.11.0",
+    "lucide-react": "^1.48.0",
+    "prettier": "^3.9.9",
+    "radix-ui": "^1.6.7",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "sharp": "0.35.4",
+    "tailwind-merge": "^3.7.0",
+    "tailwindcss": "^4.3.3",
+    "tsx": "^4.23.15",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.70.1",
+    "vite": "^8.3.1",
+    "vitest": "^5.0.2"
+  }
+}

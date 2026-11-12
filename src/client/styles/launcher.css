@@ -1,0 +1,219 @@
+/* Desktop launcher — a local film library, not a dashboard. Thumbnails carry
+   the visual weight; chrome stays quiet and the accent only marks actions. */
+.home-shell {
+  display: grid;
+  grid-template:
+    'header header' 3.625rem
+    'nav content' minmax(0, 1fr) /
+    13.5rem minmax(0, 1fr);
+  width: 100vw;
+  height: 100dvh;
+  overflow: hidden;
+  background: var(--paper);
+}
+
+.home-header {
+  grid-area: header;
+  display: grid;
+  grid-template-columns: 13.5rem minmax(15rem, 30rem) 1fr auto;
+  align-items: center;
+  gap: 1rem;
+  padding: 0 1.125rem;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.home-shell button.home-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+}
+
+.home-brand img {
+  width: 2rem;
+  height: 2rem;
+  object-fit: contain;
+}
+
+.home-brand span {
+  display: grid;
+  min-width: 0;
+}
+
+.home-brand strong {
+  font-size: 0.8125rem;
+  line-height: 1.1;
+}
+
+.home-brand small {
+  margin-top: 0.2rem;
+  color: var(--chrome-ink-faint);
+  font: 0.5625rem/1 var(--font-data);
+  letter-spacing: 0.08em;
+}
+
+.home-search {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  height: 2rem;
+  padding: 0 0.625rem;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--paper);
+  color: var(--chrome-ink-faint);
+}
+
+.home-search:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 18%, transparent);
+}
+
+.home-search svg {
+  width: 0.875rem;
+}
+
+.home-search-input {
+  flex: 1;
+  min-width: 0;
+  height: auto;
+  padding: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  font: inherit;
+  font-size: 0.8125rem;
+  color: var(--chrome-ink);
+}
+.home-search-input::placeholder {
+  color: var(--chrome-ink-faint);
+}
+.home-search-input::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+  appearance: none;
+}
+.home-search kbd {
+  flex: none;
+  opacity: 0.8;
+}
+
+.home-nav {
+  grid-area: nav;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: 1rem 0.75rem;
+  border-right: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.home-nav nav {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.home-nav nav button {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  width: 100%;
+  min-height: 2rem;
+  padding: 0 0.625rem;
+  border: 0;
+  border-radius: var(--r-md);
+  background: transparent;
+  color: var(--chrome-ink-soft);
+  font-size: 0.75rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.home-nav nav button:hover {
+  background: var(--chrome-hover);
+  color: var(--ink);
+}
+
+.home-nav nav button.is-active {
+  background: var(--accent-wash);
+  color: var(--accent-ink);
+  font-weight: 650;
+}
+
+.home-nav nav svg {
+  width: 0.9375rem;
+}
+
+.home-nav-status {
+  display: grid;
+  grid-template-columns: 0.5rem 1fr;
+  align-items: center;
+  gap: 0.625rem;
+  margin-top: auto;
+  padding: 0.75rem 0.625rem;
+  border-top: 1px solid var(--line);
+}
+
+.home-nav-status > span {
+  width: 0.5rem;
+  height: 0.5rem;
+  border: 1px solid var(--chrome-border-idle);
+  border-radius: var(--r-pill);
+  background: var(--paper);
+}
+
+.home-nav-status > span.is-ready {
+  border-color: var(--success);
+  background: var(--success);
+}
+
+.home-nav-status p {
+  display: grid;
+  gap: 0.15rem;
+  margin: 0;
+}
+
+.home-nav-status strong,
+.home-nav-status small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.home-nav-status strong {
+  font-size: 0.6875rem;
+}
+
+.home-nav-status small {
+  color: var(--chrome-ink-faint);
+  font: 0.625rem/1 var(--font-data);
+}
+
+.home-content {
+  grid-area: content;
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  padding: clamp(1.5rem, 3vw, 3rem);
+  scrollbar-gutter: stable;
+}
+
+.home-error {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding: 0.625rem 0.75rem;
+  border: 1px solid color-mix(in srgb, var(--danger) 45%, var(--line));
+  border-radius: var(--r-md);
+  background: color-mix(in srgb, var(--danger) 10%, var(--surface));
+  color: var(--danger);
+  font-size: 0.75rem;
+}

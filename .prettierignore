@@ -1,0 +1,8 @@
+dist/
+node_modules/
+pnpm-lock.yaml
+.claude/settings.local.json
+.pnpm-store/
+build/resources/
+docs/prototypes/
+videos/

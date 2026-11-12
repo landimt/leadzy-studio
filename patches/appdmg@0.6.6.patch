@@ -1,0 +1,21 @@
+diff --git a/lib/appdmg.js b/lib/appdmg.js
+index 77748bfcdaf55ea9597f65b03c9953c63ffa50dc..86f40b46bc468a8d28fa1ce3082730a7144d9775 100644
+--- a/lib/appdmg.js
++++ b/lib/appdmg.js
+@@ -9 +9 @@
+-const sizeOf = require('image-size')
++const sizeOf = require('./read-image-size')
+diff --git a/lib/read-image-size.js b/lib/read-image-size.js
+new file mode 100644
+index 0000000000000000000000000000000000000000..f2ca1a1f4b723cf51a03a3a98a02cc400d09fcbf
+--- /dev/null
++++ b/lib/read-image-size.js
+@@ -0,0 +1,8 @@
++'use strict'
++
++const { imageSizeFromFile } = require('image-size/fromFile')
++
++// Keep appdmg's callback interface while using the maintained file reader.
++module.exports = function readImageSize (filePath, callback) {
++  imageSizeFromFile(filePath).then(value => callback(null, value), callback)
++}

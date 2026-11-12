@@ -1,0 +1,99 @@
+/* --- menu bar --- */
+.menubar {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px 8px;
+  background: var(--chrome-bg);
+  color: var(--chrome-ink);
+  font-size: 13px;
+}
+.menubar .mb-project {
+  font-family: var(--font-data);
+  font-size: 11px;
+  opacity: 0.6;
+  margin-left: 4px;
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.menubar .brand-logo {
+  height: 20px;
+  object-fit: contain;
+  margin-right: 4px;
+  display: block;
+}
+.menubar .menu {
+  position: relative;
+}
+.menubar .menu > button {
+  border: none;
+  background: transparent;
+  color: inherit;
+  padding: 6px 11px;
+  border-radius: 6px;
+  font-size: 13px;
+}
+.menubar .menu > button:hover,
+.menubar .menu.open > button {
+  background: var(--chrome-hover);
+}
+
+.editor-status {
+  display: flex;
+  height: 26px;
+  align-items: center;
+  gap: 8px;
+  color: var(--ink-soft);
+}
+
+.editor-save-state,
+.editor-duration {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.editor-save-state {
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 550;
+}
+
+.editor-save-state.is-pending,
+.editor-save-state.is-saving {
+  color: var(--warn);
+}
+
+.editor-save-state.is-conflict {
+  color: var(--danger);
+}
+
+.editor-save-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  background: currentColor;
+}
+
+.editor-duration {
+  gap: 4px;
+  border-left: 1px solid var(--line);
+  padding-left: 8px;
+  font-family: var(--font-data);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+
+.badge {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-weight: 600;
+}
+.badge.outdated {
+  background: color-mix(in srgb, var(--warn) 16%, var(--surface));
+  color: var(--warn);
+}

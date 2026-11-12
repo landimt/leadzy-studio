@@ -1,0 +1,454 @@
+/* --- player --- */
+/* NLE viewer: the stage fits the area it is given — width AND height — at the
+   project's own aspect ratio, letterboxed on the surface. `cqh` needs the
+   viewer to be a size container. */
+.player-root {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  background: var(--surface);
+  container-type: inline-size;
+}
+.player-root:fullscreen {
+  background: var(--media-void);
+}
+.player-root:fullscreen .player-stage {
+  border-radius: 0;
+}
+/* Over the letterbox everything is "on media": the theme's ink would vanish
+   on black, so the chrome switches to white with translucent hovers. */
+.player-root:fullscreen .player-transport {
+  color: color-mix(in srgb, var(--on-media) 70%, transparent);
+  border-top-color: color-mix(in srgb, var(--on-media) 15%, transparent);
+}
+/* `!important`: the button's own color utility must lose here regardless of
+   layer order — on black there is no second-best colour. */
+.player-root:fullscreen .player-time,
+.player-root:fullscreen .player-transport button {
+  color: var(--on-media) !important;
+}
+.player-root:fullscreen .player-time-total,
+.player-root:fullscreen .player-chip {
+  color: color-mix(in srgb, var(--on-media) 70%, transparent);
+}
+.player-root:fullscreen .player-transport button:hover,
+.player-root:fullscreen .player-chip:hover {
+  background: color-mix(in srgb, var(--on-media) 14%, transparent);
+  color: var(--on-media);
+}
+.player-viewer {
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  container-type: size;
+}
+.player-viewer[data-zoom='fixed'] {
+  overflow: auto;
+  justify-content: safe center;
+  align-items: safe center;
+}
+/* Viewer chrome: the transport under the stage — small type, no boxes,
+   like any NLE viewer. In a narrow column it stacks: time, controls, menus. */
+.player-transport {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  flex: none;
+  gap: 6px;
+  min-height: 28px;
+  padding: 0 10px;
+  font-size: 11px;
+  color: var(--muted-foreground);
+  border-top: 1px solid var(--chrome-line-soft);
+}
+@container (max-width: 460px) {
+  .player-transport {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    row-gap: 0;
+    padding: 4px 6px;
+  }
+}
+.player-controls {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+.player-transport button svg {
+  width: 15px;
+  height: 15px;
+  stroke-width: 1.7;
+}
+/* Fullscreen: the bar is far from the eye — bigger targets, heavier strokes. */
+.player-root:fullscreen .player-transport {
+  min-height: 40px;
+  padding: 0 18px;
+  font-size: 13px;
+}
+.player-root:fullscreen .player-transport button:not(.player-chip) {
+  width: 34px;
+  height: 34px;
+}
+.player-root:fullscreen .player-transport button svg {
+  width: 20px;
+  height: 20px;
+  stroke-width: 1.9;
+}
+.player-root:fullscreen .player-time {
+  font-size: 13px;
+}
+.player-root:fullscreen .player-chip {
+  font-size: 12px;
+}
+.player-time {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  color: var(--foreground);
+  white-space: nowrap;
+}
+.player-time-total {
+  color: var(--muted-foreground);
+}
+.player-chip {
+  border: 0;
+  background: transparent;
+  padding: 2px 6px;
+  border-radius: 6px;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--muted-foreground);
+  cursor: pointer;
+}
+.player-chip:hover {
+  background: var(--chrome-hover);
+  color: var(--foreground);
+}
+.player-chip-on {
+  color: var(--accent);
+}
+.player-chip-off {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.player-chip:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 1px var(--ring);
+}
+.player-stage {
+  position: relative;
+  /* Authored layers can exceed the dialogs' z-index. Keep their ordering local
+     to the video so overlays, subtitles and gizmos cannot cover app dialogs. */
+  isolation: isolate;
+  background: var(--media-void);
+  border-radius: 14px;
+  overflow: hidden;
+  width: min(100%, calc(100cqh * var(--stage-w, 9) / var(--stage-h, 16)));
+  aspect-ratio: var(--stage-w, 9) / var(--stage-h, 16);
+  flex: none;
+}
+.player-stage .canvas-background-matte,
+.player-stage .canvas-background-media {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.player-stage .canvas-background-media {
+  display: block;
+}
+.player-stage .base-window {
+  position: absolute;
+  overflow: hidden;
+  background: var(--media-void);
+}
+/* Composite frame: canvas background + base window as one unit, so a swapped
+   PiP shrinks the whole composed frame exactly like the render graph does.
+   Same preview chrome as .pip-wrap video so both PiP directions read alike. */
+.player-stage .base-composite.swapped-pip {
+  overflow: hidden;
+  border-radius: 8px;
+  box-shadow: var(--shadow-m);
+}
+.player-stage .base-window.is-editing {
+  cursor: grab;
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+  touch-action: none;
+}
+.player-stage .base-window.is-editing:active {
+  cursor: grabbing;
+}
+.player-stage video {
+  position: absolute;
+  object-fit: cover;
+  background: var(--media-void);
+}
+.player-stage .base-video {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+/* Crossfade blend ghost — hidden by default; Player.tsx drives display/opacity
+   per frame while a base-track crossfade emenda's window is active. */
+.player-stage .crossfade-video {
+  display: none;
+  opacity: 0;
+  pointer-events: none;
+}
+.player-stage .layer-fill {
+  overflow: hidden;
+}
+.player-stage .layer-fill video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.player-stage .pip-wrap {
+  cursor: grab;
+  z-index: 2;
+}
+.player-stage .pip-wrap:active {
+  cursor: grabbing;
+}
+.player-stage .pip-wrap video {
+  position: static;
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: var(--shadow-m);
+}
+.player-stage .reframe-gizmo {
+  position: absolute;
+  border: 2px dashed var(--accent);
+  z-index: 5;
+  pointer-events: none;
+}
+.player-stage .gizmo-hint {
+  position: absolute;
+  top: 4px;
+  left: 6px;
+  font-size: 10px;
+  font-family: var(--font-data);
+  color: var(--on-media);
+  background: color-mix(in srgb, var(--scrim) 70%, transparent);
+  padding: 2px 6px;
+  border-radius: 5px;
+}
+.player-stage .gizmo-corner {
+  position: absolute;
+  right: -7px;
+  bottom: -7px;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid var(--on-media);
+  cursor: nwse-resize;
+  pointer-events: auto;
+}
+.player-stage .pip-resize {
+  position: absolute;
+  right: -6px;
+  bottom: -6px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid var(--on-media);
+  cursor: nwse-resize;
+}
+.player-stage .cell-wrap {
+  cursor: grab;
+  z-index: 2;
+  outline: 2px dashed var(--accent);
+  outline-offset: -2px;
+}
+.player-stage .cell-wrap:active {
+  cursor: grabbing;
+}
+/* Inset (not straddling the edge) — .cell-wrap inherits .layer-fill's
+   overflow:hidden so it can crop panned/zoomed content like the render does;
+   a handle placed outside the box would be clipped and unclickable. */
+.player-stage .cell-resize {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  pointer-events: auto;
+  touch-action: none;
+}
+.player-stage .cell-resize::after {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--on-media);
+  border-radius: 50%;
+  background: var(--accent);
+  content: '';
+  transform: translate(-50%, -50%);
+}
+.player-stage .cell-resize.tl {
+  left: 0;
+  top: 0;
+  cursor: nwse-resize;
+}
+.player-stage .cell-resize.tr {
+  right: 0;
+  top: 0;
+  cursor: nesw-resize;
+}
+.player-stage .cell-resize.bl {
+  left: 0;
+  bottom: 0;
+  cursor: nesw-resize;
+}
+.player-stage .cell-resize.br {
+  right: 0;
+  bottom: 0;
+  cursor: nwse-resize;
+}
+.player-stage .overlay-media {
+  position: absolute;
+  pointer-events: none;
+}
+/* No explicit z-index: painted where it sits in the DOM, after the video/pip/overlay
+   layers but before the subtitle and live badge, so it covers the stage without
+   hiding either. */
+.player-stage .transition-dip {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+/* Impact flash preview — same triangular opacity curve as the render's alpha ramp. */
+.player-stage .flash-overlay {
+  position: absolute;
+  inset: 0;
+  background: var(--on-media);
+  pointer-events: none;
+}
+.player-stage .subtitle.draggable {
+  pointer-events: auto;
+  cursor: ns-resize;
+}
+.player-stage .overlay-wrap {
+  position: absolute;
+  pointer-events: auto;
+  cursor: grab;
+}
+.player-stage .overlay-wrap img,
+.player-stage .overlay-wrap video {
+  /* static, not the absolute from .overlay-media — the wrapper must shrink
+     around the image or it lays out as X% × 0 and never receives pointers */
+  position: static;
+  display: block;
+  width: 100%;
+  pointer-events: none;
+}
+.player-stage .overlay-wrap.fullscreen {
+  pointer-events: none;
+  cursor: default;
+}
+.player-stage .overlay-wrap.selected {
+  outline: 2px dashed var(--accent);
+  outline-offset: 2px;
+}
+.player-stage .subtitle.pill {
+  text-shadow: none;
+}
+.player-stage .subtitle.pill .subtitle-content {
+  border-radius: 10px;
+  padding: 5px 12px;
+  box-decoration-break: clone;
+}
+.player-stage .subtitle-graphic {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.player-stage .subtitle-graphic > svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+/* Mirror of the burn: libass renders SRT with MarginL/R=10 at PlayResX=384
+   (≈2.6% per side), and its smart wrap balances line widths — matching both
+   keeps the live line breaks identical to the export's. */
+.player-stage .subtitle {
+  position: absolute;
+  left: 2.6%;
+  right: 2.6%;
+  bottom: 12%;
+  text-align: center;
+  text-wrap: balance;
+  /* Chrome's glyph advances run ~1.5% wider than libass over the same font,
+     which flipped borderline cues onto a second line the export doesn't have.
+     The tracking compensation keeps live wrap decisions on the export's side;
+     the definitive mirror is rendering the real ASS live (libass-wasm). */
+  letter-spacing: -0.015em;
+  color: var(--on-media);
+  font-size: 20px;
+  pointer-events: none;
+}
+
+/* Engine/proof modes: the rendered file is the whole output frame. */
+.player-stage .program-video {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* Non-blocking strip over the stage while the program renders in the background. */
+.player-render-strip {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: 8px;
+  z-index: 40;
+  display: grid;
+  gap: 4px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--media-void) 72%, transparent);
+  color: var(--on-media);
+  font-size: 12px;
+  line-height: 1.3;
+  pointer-events: none;
+}
+.player-render-strip strong {
+  font-weight: 600;
+}
+.player-render-strip .player-render-detail {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  opacity: 0.85;
+}
+.player-render-strip .player-render-bar {
+  height: 3px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--on-media) 25%, transparent);
+  overflow: hidden;
+}
+.player-render-strip .player-render-bar > span {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  transition: width 300ms ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .player-render-strip .player-render-bar > span {
+    transition: none;
+  }
+}

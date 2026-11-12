@@ -1,0 +1,89 @@
+/* --- block toolbar: quick trim/split/delete docked under the selected block --- */
+.block-toolbar {
+  position: absolute;
+  top: 100%;
+  margin-top: 3px;
+  z-index: 45;
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  background: var(--chrome-bg);
+  border: 1px solid var(--chrome-line);
+  border-radius: 8px;
+  box-shadow: var(--shadow-m);
+}
+.block-toolbar button {
+  width: var(--h-xs);
+  height: var(--h-xs);
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: var(--chrome-ink);
+  border-radius: var(--r-sm);
+}
+.block-toolbar button:hover:not(:disabled) {
+  background: var(--chrome-hover);
+}
+.block-toolbar-sep {
+  align-self: center;
+  width: 1px;
+  height: 14px;
+  background: var(--chrome-line);
+  margin: 0 2px;
+}
+
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: var(--shadow-l);
+  padding: 16px 18px;
+  min-width: 380px;
+  max-width: min(760px, 92vw);
+  max-height: 86vh;
+  overflow: auto;
+}
+.modal-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 8px 0;
+  font-size: 13px;
+  border-bottom: 1px solid var(--line);
+}
+.modal-subrow {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 2px 0 12px 4px;
+  border-bottom: 1px solid var(--line);
+}
+.modal-subrow .subrow-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--ink-soft);
+}
+.modal-subrow .subrow-hint {
+  font-size: 10px;
+  color: var(--ink-soft);
+}
+.modal-row select {
+  font-family: var(--font-body);
+  font-size: 13px;
+  padding: 4px 8px;
+  border-radius: 7px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+}
+.modal-error {
+  color: var(--danger);
+  font-size: 12px;
+  margin-top: 8px;
+}

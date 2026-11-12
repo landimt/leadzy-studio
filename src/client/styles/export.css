@@ -1,0 +1,182 @@
+/* --- export dialog: the delivery on the left, the decisions on the right --- */
+/* Tall content scrolls inside the dialog; the page never grows. */
+[data-slot='dialog-content'].export-dialog {
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
+}
+.export-body {
+  display: grid;
+  grid-template-columns: 300px minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+/* Narrow windows: the delivery sits above the decisions, short enough to
+   leave the form in reach. */
+@media (max-width: 900px) {
+  .export-body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .export-stage {
+    max-height: 38vh;
+  }
+}
+
+/* The stage keeps the document's frame before, during and after the video
+   loads — the dialog never jumps. */
+.export-viewer {
+  display: grid;
+  gap: 8px;
+  justify-items: center;
+}
+.export-stage {
+  position: relative;
+  width: 100%;
+  max-height: 440px;
+  aspect-ratio: var(--stage-w, 9) / var(--stage-h, 16);
+  border-radius: 10px;
+  background: var(--media-void);
+  overflow: hidden;
+}
+.export-stage video,
+.export-stage-empty {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.export-stage video {
+  object-fit: contain;
+  background: var(--media-void);
+}
+.export-stage-empty {
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  text-align: center;
+  color: color-mix(in srgb, var(--on-media) 70%, transparent);
+  font-size: 12px;
+}
+.export-caption {
+  margin: 0;
+  text-align: center;
+  font-size: 12px;
+  color: var(--muted-foreground);
+}
+.export-caption[data-exact] {
+  color: var(--success);
+}
+
+.export-form {
+  display: grid;
+  gap: 14px;
+  align-content: start;
+  min-width: 0;
+}
+.export-group {
+  display: grid;
+  gap: 8px;
+}
+.export-eyebrow {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+.export-row {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+}
+.export-key {
+  color: var(--muted-foreground);
+}
+.export-inline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 14px;
+}
+.export-techline {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--muted-foreground);
+  font-variant-numeric: tabular-nums;
+}
+.export-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  cursor: pointer;
+}
+.export-path {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+}
+.export-path-field,
+.export-filename-preview {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.export-path-field {
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper);
+}
+.export-filename-preview {
+  max-width: 200px;
+  color: var(--muted-foreground);
+}
+
+.export-progress {
+  display: grid;
+  gap: 8px;
+  padding: 16px 0;
+  font-size: 12px;
+  color: var(--muted-foreground);
+}
+.export-progress strong {
+  color: var(--foreground);
+  font-weight: 500;
+}
+.export-progress-bar {
+  display: block;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--line);
+  overflow: hidden;
+}
+.export-progress-bar > span {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  transition: width 300ms ease-out;
+}
+
+.export-footer {
+  align-items: center;
+}
+.export-footer-sum {
+  flex: 1;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--muted-foreground);
+}
+.export-footer-sum b {
+  color: var(--foreground);
+  font-weight: 400;
+}
+@media (prefers-reduced-motion: reduce) {
+  .export-progress-bar > span {
+    transition: none;
+  }
+}

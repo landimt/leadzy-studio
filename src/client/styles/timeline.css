@@ -1,0 +1,1034 @@
+/* --- timeline ---
+   `.block` is scoped under `.timeline` on purpose: the bare class collides with
+   Tailwind's `block` display utility, and an unscoped rule reaches any shadcn
+   component that only wanted `display:block` — it was pulling the slider thumb
+   6px off-centre via `position:absolute; top:6px`. */
+.timeline {
+  border-top: 1px solid var(--chrome-raised);
+  background: var(--surface);
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 8px;
+  position: relative;
+}
+.timeline-inner {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  box-sizing: border-box;
+  width: max(
+    100%,
+    calc(
+      var(--timeline-track-header-w) + var(--timeline-zero-gutter) + var(--timeline-canvas-w, 100%)
+    )
+  );
+  min-width: 100%;
+  min-height: 100%;
+  touch-action: none;
+  user-select: none;
+}
+.timeline-inner > .ruler,
+.timeline-inner > .track {
+  flex: none;
+}
+/* The document keeps its stable render/mix order; the editor presents the
+   familiar visual stack: graphics and video above the base, music/SFX below. */
+.timeline-inner > .ruler {
+  order: 0;
+}
+.timeline-inner > .subtitle-track {
+  order: 10;
+}
+.timeline-inner > .element-track {
+  order: 20;
+}
+.timeline-inner > .video-layer-track {
+  order: 30;
+}
+.timeline-inner > .effect-track {
+  order: 40;
+}
+.timeline-inner > .base-track {
+  order: 50;
+}
+.timeline-inner > .audio-track {
+  order: 60;
+}
+.timeline-inner > .background-track {
+  order: 70;
+}
+.timeline-inner.is-scrubbing,
+.timeline-inner.is-scrubbing .ruler {
+  cursor: ew-resize;
+}
+.ruler {
+  position: relative;
+  display: grid;
+  grid-template-columns:
+    var(--timeline-track-header-w)
+    minmax(calc(var(--timeline-zero-gutter) + var(--timeline-canvas-w)), 1fr);
+  height: 22px;
+  border-bottom: 1px solid var(--chrome-line-soft);
+  font-family: var(--font-data);
+  font-size: 10px;
+  color: var(--chrome-ink-faint);
+  cursor: pointer;
+}
+.timeline-ruler-corner {
+  position: sticky;
+  left: 0;
+  z-index: 7;
+  grid-column: 1;
+  height: 100%;
+  border-right: 1px solid var(--chrome-line-soft);
+  background: var(--surface);
+}
+.ruler-lane {
+  position: relative;
+  grid-column: 2;
+  width: var(--timeline-canvas-w);
+  height: 100%;
+  margin-left: var(--timeline-zero-gutter);
+}
+.ruler .tick {
+  position: absolute;
+  top: 0;
+  border-left: 1px solid var(--chrome-line-soft);
+  padding-left: 3px;
+  height: 100%;
+}
+.ruler .tick:first-child {
+  border-left: 0;
+}
+.timeline-guide-layer {
+  position: absolute;
+  z-index: 4;
+  top: 0;
+  bottom: 0;
+  left: calc(var(--timeline-track-header-w) + var(--timeline-zero-gutter));
+  width: var(--timeline-canvas-w);
+  pointer-events: none;
+}
+.timeline-guide-layer .playhead {
+  pointer-events: auto;
+}
+.track {
+  position: relative;
+  display: grid;
+  grid-template-columns:
+    var(--timeline-track-header-w)
+    minmax(calc(var(--timeline-zero-gutter) + var(--timeline-canvas-w)), 1fr);
+  width: 100%;
+  /* head + lane: the header band is added, never carved out of the lane, so the
+     height slider keeps meaning "how tall are the clips". */
+  height: calc(var(--track-h, 72px) + var(--track-head-h));
+  border-bottom: 1px solid var(--chrome-line-soft);
+  transition: height 160ms ease-out;
+}
+.track.overlay-track,
+.track.subtitle-track {
+  height: calc(var(--track-head-h) + var(--h-xs));
+}
+.track.is-collapsed {
+  height: var(--h-xs);
+  border-bottom-color: var(--chrome-line);
+}
+.track-lane {
+  position: relative;
+  grid-column: 2;
+  width: var(--timeline-canvas-w);
+  height: 100%;
+  margin-left: var(--timeline-zero-gutter);
+  transition: opacity 100ms ease-out;
+}
+.track.is-preview-hidden .track-lane {
+  opacity: 0.35;
+}
+.track.is-collapsed .track-lane > :not(.track-lane-name) {
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity 80ms ease-out,
+    visibility 0s linear 80ms;
+}
+.track.is-locked .track-lane > :not(.track-lane-name) {
+  pointer-events: none;
+}
+.track .track-label {
+  position: sticky;
+  left: 0;
+  z-index: 6;
+  grid-column: 1;
+  display: flex;
+  width: var(--timeline-track-header-w);
+  height: 100%;
+  margin: 0;
+  padding: 0 0.25rem;
+  align-items: center;
+  gap: 0;
+  overflow: hidden;
+  border-right: 1px solid var(--chrome-line-soft);
+  background: var(--surface);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--chrome-ink-soft);
+  pointer-events: auto;
+}
+.track.is-collapsed .track-label {
+  border-bottom: 1px solid var(--chrome-line);
+}
+.track .track-collapse-button {
+  position: relative;
+  display: inline-grid;
+  width: var(--timeline-track-control-size);
+  height: var(--timeline-track-control-size);
+  flex: 0 0 var(--timeline-track-control-size);
+  place-items: center;
+  border: 0;
+  border-radius: var(--r-sm);
+  padding: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  pointer-events: auto;
+}
+.track .track-collapse-button::before {
+  content: none;
+}
+.track.is-collapsed .track-collapse-button {
+  height: var(--timeline-track-control-size);
+}
+.track .track-collapse-button svg {
+  transition: transform 160ms ease-out;
+}
+.track .track-collapse-button[aria-expanded='false'] svg {
+  transform: rotate(-90deg);
+}
+.track .track-collapse-button:hover {
+  color: var(--accent-ink);
+}
+.track .track-collapse-button:focus-visible,
+.track .track-lane-name:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: -2px;
+}
+.track .track-lane-name {
+  position: sticky;
+  top: 0;
+  left: calc(var(--timeline-track-header-w) + var(--timeline-zero-gutter) + 0.25rem);
+  z-index: 3;
+  display: inline-flex;
+  max-width: min(18rem, calc(100% - 0.5rem));
+  min-width: 0;
+  height: var(--track-head-h);
+  overflow: hidden;
+  appearance: none;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--chrome-ink-soft);
+  align-items: center;
+  gap: 4px;
+  font-family: inherit;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: var(--track-head-h);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  pointer-events: none;
+}
+.track .track-lane-name:is(button) {
+  appearance: none;
+  height: var(--track-head-h);
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+  color: var(--chrome-ink-soft);
+  font-family: inherit;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: var(--track-head-h);
+  cursor: pointer;
+  pointer-events: auto;
+}
+.track .track-lane-name:is(button):hover {
+  color: var(--accent-ink);
+}
+.track .track-lane-name.is-reorder-handle {
+  cursor: grab;
+}
+.track .track-lane-name.is-reorder-handle:active {
+  cursor: grabbing;
+}
+.track.is-track-dragging {
+  opacity: 0.46;
+}
+.track.is-track-drop-target {
+  box-shadow: inset 0 2px 0 var(--accent);
+}
+.track .track-lane-name:is(button):disabled {
+  opacity: 1;
+  cursor: default;
+}
+.track .track-lane-name-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.track.is-collapsed .track-lane-name {
+  height: var(--h-xs);
+  line-height: var(--h-xs);
+}
+.track-label .track-control,
+.track-label .eye {
+  display: inline-grid;
+  width: var(--timeline-track-control-size);
+  height: var(--timeline-track-control-size);
+  place-items: center;
+  border: none;
+  border-radius: var(--r-sm);
+  background: transparent;
+  color: inherit;
+  padding: 0;
+  cursor: pointer;
+}
+.track-label .track-control:hover,
+.track-label .eye:hover {
+  color: var(--accent-ink);
+}
+.track-label .track-control[aria-pressed='true'] {
+  color: var(--accent-ink);
+}
+.track-label .track-control:focus-visible,
+.track-label .eye:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: -2px;
+}
+.track .track-lane-name svg,
+.track-label .track-control svg,
+.track-label .eye svg {
+  width: var(--track-icon-size);
+  height: var(--track-icon-size);
+}
+.timeline .block {
+  position: absolute;
+  top: calc(var(--track-head-h) + 6px);
+  bottom: 6px;
+  background: color-mix(in srgb, var(--track-base) var(--tint-soft), transparent);
+  border: 1px solid var(--accent);
+  border-radius: 5px;
+  overflow: hidden;
+  cursor: pointer;
+}
+.timeline .block.selected {
+  border-color: var(--accent-ink);
+  box-shadow: 0 0 0 2px var(--accent-wash);
+}
+/* ⌘/Ctrl and Shift multi-selection: same ring as .selected, dashed to read as
+   "part of the batch" rather than "the active block" (drag/inspector/toolbar
+   still follow .selected only). */
+.timeline .block.selected-extra {
+  border-style: dashed;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent-wash) 65%, transparent);
+}
+.timeline .block.layer {
+  background: color-mix(in srgb, var(--track-effect) var(--tint-soft), transparent);
+  border-color: var(--track-effect);
+}
+.timeline .block.layer,
+.timeline .block.overlay-block,
+.timeline .block.audio-layer {
+  cursor: grab;
+}
+/* Stacked element lanes: taller pills on a tight 3px gap — 18px of block fits
+   the 12px label icon with borders, where the default 12px pill clipped it.
+   The row index arrives per block as --lane-row (0 = TOP row = renders on
+   top); the track's total height is set inline from the lane count. */
+.track.overlay-track.is-stacked .block.overlay-block {
+  top: calc(var(--track-head-h) + 3px + var(--lane-row, 0) * (var(--h-xs) - 3px));
+  bottom: auto;
+  height: calc(var(--h-xs) - 6px);
+}
+.timeline .block.audio-layer {
+  background: color-mix(in srgb, var(--data-audio) 14%, var(--chrome-raised));
+  border-color: color-mix(in srgb, var(--data-audio) 72%, var(--chrome-ink-soft));
+}
+.timeline .block.background-block {
+  border-color: color-mix(in srgb, var(--chrome-ink-soft) 50%, var(--chrome-line));
+  background-repeat: no-repeat;
+  color: var(--on-media);
+  cursor: pointer;
+}
+.timeline .block.background-block:disabled {
+  cursor: default;
+}
+.background-block-label {
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  left: 6px;
+  display: inline-flex;
+  max-width: calc(100% - 12px);
+  overflow: hidden;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 5px;
+  border-radius: var(--r-sm);
+  background: color-mix(in srgb, var(--media-void) 70%, transparent);
+  color: var(--on-media);
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1;
+  text-overflow: ellipsis;
+  text-shadow: 0 1px 2px color-mix(in srgb, var(--media-void) 82%, transparent);
+  transform: translateY(-50%);
+  white-space: nowrap;
+}
+.timeline .block.audio-layer:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 1px;
+}
+.timeline .block.audio-layer canvas {
+  z-index: 0;
+  height: 48%;
+  opacity: 0.88;
+}
+.audio-clip-name {
+  position: absolute;
+  z-index: 1;
+  top: 2px;
+  left: 6px;
+  right: 6px;
+  overflow: hidden;
+  color: var(--chrome-ink);
+  font-size: 9px;
+  font-weight: 650;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.audio-envelope-curve {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+.audio-envelope-curve polyline {
+  fill: color-mix(in srgb, var(--data-audio) 18%, transparent);
+  stroke: var(--data-audio);
+  stroke-width: 1.25;
+  vector-effect: non-scaling-stroke;
+}
+.audio-envelope-gain,
+.audio-envelope-handle {
+  position: absolute;
+  z-index: 4;
+  appearance: none;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--data-audio);
+}
+.audio-envelope-gain {
+  left: 5px;
+  right: 5px;
+  width: auto;
+  height: 9px;
+  transform: translateY(-50%);
+  cursor: ns-resize;
+}
+.audio-envelope-handle {
+  width: 12px;
+  height: 18px;
+  transform: translate(-50%, -50%);
+  cursor: ew-resize;
+}
+.audio-envelope-handle::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 6px;
+  height: 6px;
+  transform: translate(-50%, -50%);
+  border: 1px solid var(--chrome-raised);
+  border-radius: var(--r-pill);
+  background: var(--data-audio);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--data-audio) 65%, transparent);
+}
+.audio-envelope-gain:focus-visible,
+.audio-envelope-handle:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: -2px;
+}
+.audio-gain-badge {
+  position: absolute;
+  z-index: 5;
+  right: 4px;
+  top: 3px;
+  border-radius: var(--r-sm);
+  padding: 1px 3px;
+  background: color-mix(in srgb, var(--chrome-raised) 86%, transparent);
+  color: var(--chrome-ink-soft);
+  font-family: var(--font-data);
+  font-size: 8px;
+  line-height: 1.2;
+  pointer-events: none;
+}
+.timeline .block.overlay-block {
+  background: color-mix(in srgb, var(--track-overlay) var(--tint-soft), transparent);
+  border-color: var(--track-overlay-edge);
+  top: calc(var(--track-head-h) + 3px);
+  bottom: 3px;
+}
+.timeline .block.effect-block {
+  background: color-mix(in srgb, var(--track-effect) var(--tint-medium), transparent);
+  border-color: var(--track-effect);
+  top: calc(var(--track-head-h) + 3px);
+  bottom: 3px;
+  cursor: grab;
+}
+.timeline .block.is-dragging {
+  cursor: grabbing;
+  filter: brightness(1.12);
+  box-shadow: var(--shadow-s);
+}
+.effect-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-family: var(--font-data);
+  font-size: 10px;
+  color: color-mix(in srgb, var(--track-effect) 45%, var(--chrome-ink));
+  padding: 2px 6px;
+  white-space: nowrap;
+}
+.overlay-block .effect-label {
+  color: color-mix(in srgb, var(--track-overlay) 45%, var(--chrome-ink));
+}
+.timeline .block.subtitle-cue {
+  /* Derived from the chrome ink rather than the line token: a cue pill sits on
+     the track surface, and --line is close enough to it that the pill vanished
+     on paper (measured 1.23:1, under the 3:1 floor for a non-text control). */
+  background: color-mix(in srgb, var(--chrome-ink) 8%, var(--chrome-raised));
+  /* 48% é o traço mais leve que ainda cruza o piso de 3:1 no tema claro
+     (mede 3,17:1; 46% cai para 2,97). Abaixo disso a faixa de legendas fica
+     mais calma mas a pílula deixa de ser identificável como controle. */
+  border-color: color-mix(in srgb, var(--chrome-ink) 48%, transparent);
+  border-radius: 4px;
+  top: calc(var(--track-head-h) + 3px);
+  bottom: 3px;
+  cursor: pointer;
+  pointer-events: auto;
+}
+.timeline .subtitle-track.selected .block.subtitle-cue {
+  border-color: var(--track-effect);
+  background: color-mix(in srgb, var(--track-effect) var(--tint-medium), var(--chrome-raised));
+}
+.timeline .subtitle-track .block.subtitle-cue.selected {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 26%, var(--chrome-raised));
+  box-shadow: 0 0 0 1px var(--accent);
+}
+.timeline .subtitle-track .block.subtitle-cue.selected-extra {
+  border-style: dashed;
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 14%, var(--chrome-raised));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 50%, transparent);
+}
+.timeline .block.starts-at-zero {
+  border-left-width: 0;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+.subtitle-hidden {
+  position: absolute;
+  top: calc(var(--track-head-h) + 3px);
+  bottom: 3px;
+  z-index: 2;
+  cursor: pointer;
+  padding: 0;
+  height: auto;
+  border: 1px solid var(--danger);
+  border-radius: 3px;
+  opacity: 0.85;
+  background: repeating-linear-gradient(
+    45deg,
+    color-mix(in srgb, var(--danger) 35%, transparent),
+    color-mix(in srgb, var(--danger) 35%, transparent) 4px,
+    color-mix(in srgb, var(--danger) 12%, transparent) 4px,
+    color-mix(in srgb, var(--danger) 12%, transparent) 8px
+  );
+}
+.subtitle-hidden:hover {
+  opacity: 1;
+}
+.timeline .block canvas {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 45%;
+  background: color-mix(in srgb, var(--data-audio) var(--tint-soft), transparent);
+}
+.timeline .block .thumbs {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 55%;
+  display: flex;
+  overflow: hidden;
+  border-bottom: 1px solid color-mix(in srgb, var(--media-void) 35%, transparent);
+}
+.timeline .block .thumbs img,
+.timeline .block .thumbs span {
+  width: 56px;
+  height: 100%;
+  object-fit: cover;
+  flex: none;
+}
+.timeline .block .thumbs img {
+  pointer-events: none;
+}
+.timeline .block .edge {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  /* narrow blocks keep a grabbable center for move/reorder */
+  width: min(8px, 30%);
+  cursor: ew-resize;
+  z-index: 2;
+}
+.timeline .block .edge.left {
+  left: 0;
+}
+.timeline .block .edge.right {
+  right: 0;
+}
+.timeline .block .speed-badge {
+  position: absolute;
+  right: 3px;
+  bottom: 2px;
+  z-index: 2;
+  font-family: var(--font-data);
+  font-size: 9px;
+  line-height: 1;
+  padding: 1px 3px;
+  border-radius: 3px;
+  color: var(--chrome-ink);
+  background: color-mix(in srgb, var(--chrome-raised) 70%, transparent);
+  pointer-events: none;
+}
+/* The visible dot stays small (fits the dense timeline), but the button's
+   own box is a larger, easier-to-hit target — grown via ::after, not the box. */
+.transition-chip {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  z-index: 3;
+}
+.transition-chip::after {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  border-radius: 3px;
+  border: 1.5px solid var(--chrome-border-idle);
+  background: var(--chrome-raised);
+  opacity: 0.32;
+}
+.transition-chip:hover::after {
+  opacity: 0.9;
+}
+.transition-chip.has-transition::after {
+  opacity: 1;
+  border-color: var(--track-effect);
+  background: var(--track-effect);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--track-effect) 25%, transparent);
+}
+.drop-indicator {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  margin-left: -1.5px;
+  background: var(--accent);
+  border-radius: 2px;
+  box-shadow: 0 0 6px color-mix(in srgb, var(--accent) 70%, transparent);
+  pointer-events: none;
+  z-index: 6;
+}
+.track.is-media-drop-target .track-lane {
+  background: color-mix(in srgb, var(--accent) 11%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 60%, transparent);
+}
+.media-drop-preview {
+  position: absolute;
+  z-index: 7;
+  top: var(--track-head-h);
+  bottom: 0;
+  width: 2px;
+  margin-left: -1px;
+  border-radius: var(--r-pill);
+  background: var(--accent);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--accent) 72%, transparent);
+  pointer-events: none;
+}
+.media-drop-preview > span {
+  position: absolute;
+  top: 5px;
+  left: 6px;
+  max-width: 13rem;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--accent) 60%, transparent);
+  border-radius: var(--r-sm);
+  padding: 3px 6px;
+  background: color-mix(in srgb, var(--chrome-bg) 88%, transparent);
+  color: var(--on-media);
+  font-size: 9px;
+  font-weight: 650;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  backdrop-filter: blur(6px);
+}
+.media-drop-preview-global {
+  top: 22px;
+}
+/* live "make space" reflow while a base block is being dragged for reorder */
+.timeline .timeline-inner.is-reordering .block:not(.is-dragging) {
+  transition: left 120ms ease;
+}
+.playhead {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1.5px;
+  background: var(--on-media);
+  box-shadow: 0 0 5px color-mix(in srgb, var(--media-void) 60%, transparent);
+  z-index: 4;
+  cursor: ew-resize;
+  pointer-events: auto;
+}
+.playhead::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -8px;
+  width: 17px;
+}
+.timeline-inner.is-scrubbing .playhead {
+  cursor: grabbing;
+}
+.playhead-handle {
+  position: absolute;
+  top: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 11px;
+  height: 15px;
+  background: var(--on-media);
+  border-radius: 4px 4px 5px 5px;
+  clip-path: polygon(0 0, 100% 0, 100% 62%, 50% 100%, 0 62%);
+}
+.context-menu {
+  position: fixed;
+  z-index: 60;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  box-shadow: var(--shadow-m);
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+  min-width: 170px;
+}
+.context-menu button {
+  border: none;
+  background: transparent;
+  text-align: left;
+  padding: 7px 10px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.context-menu button svg {
+  flex: none;
+}
+.context-menu button:hover {
+  background: var(--accent-wash);
+}
+.context-menu button.active {
+  background: var(--accent-wash);
+}
+.context-menu .speed-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 4px 10px 6px;
+  border-top: 1px solid var(--line);
+  margin-top: 2px;
+}
+.context-menu .speed-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.context-menu .speed-preset {
+  border: 1px solid var(--line);
+  background: transparent;
+  border-radius: 6px;
+  padding: 3px 7px;
+  font-family: var(--font-data);
+  font-size: 11px;
+  cursor: pointer;
+}
+.context-menu .speed-preset:hover {
+  background: var(--accent-wash);
+}
+.context-menu .speed-preset.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--on-accent);
+}
+.context-menu .speed-custom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--ink-soft);
+}
+.context-menu .speed-custom input {
+  width: 56px;
+  font-family: var(--font-data);
+  font-size: 11px;
+  padding: 2px 5px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: var(--surface);
+  color: inherit;
+}
+/* The 8px is the grab area, not the visual. Painting the whole strip on hover
+   drops a thick bar across the app; the affordance is a 2px line centred in it,
+   and the remaining 6px stay invisible but grabbable. */
+.row-divider {
+  position: relative;
+  height: 8px;
+  cursor: row-resize;
+  background: transparent;
+}
+.row-divider::after {
+  content: '';
+  position: absolute;
+  inset: 3px 0;
+  background: transparent;
+  transition: background 0.12s;
+}
+.row-divider:hover::after,
+.row-divider:active::after {
+  background: color-mix(in srgb, var(--accent) 55%, transparent);
+}
+.snap-guide {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  margin-left: -1px;
+  background: var(--snap-guide);
+  box-shadow: 0 0 6px color-mix(in srgb, var(--snap-guide) 70%, transparent);
+  pointer-events: none;
+  z-index: 5;
+}
+.snap-tooltip {
+  position: fixed;
+  background: var(--ink);
+  color: var(--on-media);
+  font-family: var(--font-data);
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  pointer-events: none;
+  z-index: 50;
+  white-space: nowrap;
+}
+.timeline-toolbar {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--chrome-raised);
+  background: var(--surface);
+  color: var(--chrome-ink);
+  font-size: 12px;
+}
+.timeline-toolbar > div > button:not([data-slot]),
+.timeline-toolbar > button:not([data-slot]) {
+  background: transparent;
+  color: inherit;
+  border: 1px solid var(--chrome-line);
+  border-radius: 8px;
+}
+.timeline-toolbar input[type='range'] {
+  accent-color: var(--accent);
+}
+.timeline-toolbar [data-slot='toggle'] {
+  color: var(--chrome-ink-soft);
+  transition:
+    color 120ms ease,
+    background-color 120ms ease,
+    box-shadow 120ms ease;
+}
+.timeline-toolbar [data-slot='toggle']:hover {
+  color: var(--chrome-ink) !important;
+  background: var(--chrome-hover) !important;
+}
+.timeline-toolbar [data-slot='toggle'][aria-pressed='true'] {
+  color: var(--accent) !important;
+  background: var(--accent-wash) !important;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 52%, transparent);
+}
+.timeline-toolbar [data-slot='toggle'][aria-pressed='true'] svg {
+  stroke-width: 2.25;
+}
+.timeline-toolbar .timeline-snap {
+  border: 1px solid var(--chrome-border-idle);
+}
+.timeline-toolbar .timeline-snap[aria-pressed='true'] {
+  color: var(--on-accent) !important;
+  background: var(--accent-solid) !important;
+  border-color: var(--accent-solid);
+  box-shadow: 0 0 0 2px var(--accent-wash);
+}
+.timeline-toolbar .timeline-snap[aria-pressed='true'] svg {
+  stroke-width: 2.25;
+}
+.timeline-toolbar .tool {
+  width: var(--h-md);
+  height: var(--h-md);
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: var(--chrome-ink);
+  border-radius: var(--r-sm);
+}
+.timeline-toolbar .tool:hover:not(:disabled) {
+  background: var(--chrome-hover);
+}
+.timeline-toolbar .tool:disabled {
+  opacity: 0.3;
+}
+.timeline-toolbar .timecode {
+  color: var(--chrome-ink-soft);
+  white-space: nowrap;
+}
+
+.track .track-lane-heading {
+  position: sticky;
+  left: calc(var(--timeline-track-header-w) + var(--timeline-zero-gutter) + 0.25rem);
+  z-index: 4;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: var(--track-head-h);
+  max-width: calc(100% - 8px);
+  vertical-align: top;
+}
+.track .track-lane-heading .track-lane-name {
+  position: static;
+  flex: 0 1 auto;
+}
+.track-lane-indicators {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+.track .track-indicator {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 17px;
+  height: 15px;
+  padding: 0 4px;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  box-shadow: none;
+  background: transparent;
+  color: var(--ink-soft);
+  font-size: 9px;
+  font-weight: 600;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition:
+    background 120ms ease,
+    color 120ms ease;
+}
+.track .track-indicator.is-active {
+  color: var(--accent-ink);
+  background: #f8e5ed;
+  border-color: #e7c8d6;
+}
+.track .track-indicator:hover {
+  background: #efd4e1;
+}
+.track .track-indicator:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+.track.is-collapsed .track-lane > .track-lane-heading,
+.track.is-locked .track-lane > .track-lane-heading {
+  display: inline-flex;
+  pointer-events: auto;
+}
+
+.track-lane.is-color-drop-target {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+  background: var(--accent-soft);
+}
+.block.is-color-drop-target {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+  filter: brightness(1.08);
+}
+.clip-color-indicator {
+  position: absolute;
+  top: 2px;
+  right: 3px;
+  z-index: 5;
+  min-width: 15px;
+  height: 13px;
+  padding: 0 3px;
+  border: 0;
+  border-radius: 2px;
+  font-size: 8px;
+  line-height: 1;
+  color: var(--accent-ink);
+  background: var(--accent-soft);
+}

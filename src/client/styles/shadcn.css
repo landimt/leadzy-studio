@@ -1,0 +1,51 @@
+/* Every shadcn primitive carries `data-slot`, and it brings its own surface.
+   Excluding those here is what stops the legacy bare-element styling from
+   fighting each migrated control — without it every migrated button needs a
+   manual `border-0 p-0` escape hatch at the call site. */
+button:not([data-slot]) {
+  font-family: var(--font-body);
+  font-size: 13px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  border-radius: var(--r-md);
+  padding: 6px 12px;
+  cursor: pointer;
+}
+button:not([data-slot]):hover:not(:disabled) {
+  border-color: var(--accent);
+}
+button:not([data-slot]):disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+button:not([data-slot]).primary {
+  background: var(--accent-solid);
+  border-color: var(--accent-solid);
+  color: var(--on-accent);
+  font-weight: 600;
+}
+button:not([data-slot]).primary:hover:not(:disabled) {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+button:not([data-slot]).ghost {
+  border-color: transparent;
+  background: transparent;
+} /* the vertical scrollbar reserves its lane up front — content never jumps
+   sideways when it appears */
+.transcript .words,
+.main,
+.modal {
+  scrollbar-gutter: stable;
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+.app > .main {
+  flex: 1;
+  min-height: 0;
+}

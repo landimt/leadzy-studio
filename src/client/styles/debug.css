@@ -1,0 +1,106 @@
+/* Debug panel — a floating, non-modal window over the editor. */
+.debug-panel {
+  position: fixed;
+  right: 12px;
+  bottom: 12px;
+  z-index: 60;
+  width: min(420px, calc(100vw - 24px));
+  max-height: 60vh;
+  overflow: auto;
+  display: grid;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--chrome-line);
+  border-radius: var(--r-lg);
+  background: var(--chrome-bg);
+  color: var(--chrome-ink);
+  font-family: var(--font-data);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--ink) 18%, transparent);
+}
+.debug-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.debug-panel section {
+  display: grid;
+  gap: 4px;
+}
+.debug-panel ul,
+.debug-panel ol {
+  margin: 0;
+  padding-left: 0;
+  list-style: none;
+  display: grid;
+  gap: 2px;
+}
+.debug-panel-facts div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+.debug-panel-facts dt {
+  color: var(--chrome-ink-soft);
+}
+.debug-panel-facts dd {
+  margin: 0;
+}
+.debug-panel-log li {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.debug-panel-time {
+  color: var(--chrome-ink-soft);
+}
+.debug-panel-empty {
+  margin: 0;
+  color: var(--chrome-ink-soft);
+}
+.debug-panel-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.debug-entry {
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  align-items: baseline;
+  gap: 6px;
+}
+.debug-entry-text {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.debug-badge {
+  display: inline-block;
+  padding: 0 6px;
+  border-radius: var(--r-pill);
+  font-size: 10px;
+  line-height: 16px;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  background: color-mix(in srgb, var(--chrome-ink) var(--tint-soft), transparent);
+  color: var(--chrome-ink);
+}
+.debug-badge--running {
+  background: var(--accent-wash);
+  color: var(--accent-ink);
+}
+.debug-badge--success {
+  background: color-mix(in srgb, var(--success) var(--tint-medium), transparent);
+  color: var(--success);
+}
+.debug-badge--error {
+  background: color-mix(in srgb, var(--danger) var(--tint-medium), transparent);
+  color: var(--danger);
+}
+.debug-badge--edit {
+  background: color-mix(in srgb, var(--agent) var(--tint-soft), transparent);
+  color: var(--agent);
+}
+.debug-badge--assets {
+  background: color-mix(in srgb, var(--warn) var(--tint-soft), transparent);
+  color: var(--chrome-ink);
+}

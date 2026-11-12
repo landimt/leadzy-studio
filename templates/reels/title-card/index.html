@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1080px; height: 1920px; overflow: hidden; background: transparent; }
+      body { font-family: 'Inter', -apple-system, sans-serif; }
+      .card {
+        position: absolute; left: 60px; right: 60px; top: {{TOP}}px;
+        text-align: center; font-weight: 800; font-size: 58px; line-height: 1.3;
+        opacity: 0; transform: translateY(40px) scale(0.94);
+      }
+      .card.card-paper {
+        background: #faf8f5; color: #141110; border-radius: 26px; padding: 38px 44px;
+        box-shadow: 0 14px 44px rgba(16, 16, 16, 0.35);
+      }
+      .card.card-dark {
+        background: #141110; color: #ffffff; border-radius: 22px; padding: 34px 40px;
+        box-shadow: 0 14px 44px rgba(0, 0, 0, 0.45);
+      }
+      .card.card-plain {
+        color: #ffffff;
+        text-shadow: -3px -3px 0 #141110, 3px -3px 0 #141110, -3px 3px 0 #141110,
+          3px 3px 0 #141110, 0 6px 18px rgba(0, 0, 0, 0.5);
+      }
+      .card em { font-style: normal; color: #e5388c; }
+      .card.card-plain em { color: #ff70b0; }
+    </style>
+  </head>
+  <body>
+    <div
+      id="root"
+      data-composition-id="main"
+      data-start="0"
+      data-duration="{{DUR}}"
+      data-width="1080"
+      data-height="1920"
+    >
+      <div
+        id="card"
+        class="clip card card-{{STYLE}}"
+        data-start="0"
+        data-duration="{{DUR}}"
+        data-track-index="1"
+      >
+        {{TEXT}}
+      </div>
+    </div>
+    <script>
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+      tl.to('#card', { opacity: 1, y: 0, scale: 1, duration: 0.38, ease: 'back.out(1.7)' }, 0.05);
+      window.__timelines['main'] = tl;
+    </script>
+  </body>
+</html>

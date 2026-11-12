@@ -1,0 +1,34 @@
+name: Feature request
+description: Propose a focused improvement to the editor or contributor workflow.
+title: 'feature: '
+labels:
+  - enhancement
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What user or contributor problem should this solve?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior
+      description: Describe the smallest useful outcome, not only an implementation.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives and tradeoffs
+      description: Note any local/cloud, licensing, platform, privacy, or compatibility implications.
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Scope check
+      options:
+        - label: I checked ROADMAP.md and searched for an existing issue.
+          required: true
+        - label: I am not including private media, credentials, or customer information.
+          required: true

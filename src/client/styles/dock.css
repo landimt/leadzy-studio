@@ -1,0 +1,53 @@
+/* Dockable panels: two areas, tabs dragged between them. */
+.dock-area {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 0;
+  min-height: 0;
+  min-width: 0;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.dock-area[data-drop-hover] {
+  outline: 2px dashed var(--accent);
+  outline-offset: -4px;
+}
+.dock-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+.dock-content > * {
+  flex: 1;
+  min-height: 0;
+}
+.dock-empty {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  text-align: center;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: var(--muted-foreground);
+}
+.dock-ghost {
+  position: fixed;
+  z-index: 100;
+  transform: translate(-50%, -140%) rotate(-3deg);
+  padding: 4px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--accent);
+  background: var(--surface);
+  box-shadow: var(--shadow-m);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--foreground);
+  pointer-events: none;
+}

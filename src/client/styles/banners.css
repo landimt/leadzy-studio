@@ -1,0 +1,97 @@
+/* --- banners --- */
+.banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+  font-size: 13px;
+}
+.banner.conflict {
+  background: color-mix(in srgb, var(--warn) 16%, var(--surface));
+  border-bottom: 1px solid var(--warn);
+}
+.banner.error {
+  background: color-mix(in srgb, var(--danger) 14%, var(--surface));
+  border-bottom: 1px solid var(--danger);
+  color: var(--danger);
+}
+.banner.info {
+  background: var(--accent-wash);
+  border-bottom: 1px solid var(--line);
+}
+.banner.warn {
+  background: color-mix(in srgb, var(--warn) 16%, var(--surface));
+  border-bottom: 1px solid var(--warn);
+  color: var(--ink);
+}
+.banner.success {
+  background: color-mix(in srgb, var(--success) 16%, var(--surface));
+  border-bottom: 1px solid var(--success);
+  color: var(--success);
+}
+.banner pre {
+  max-height: 160px;
+  overflow: auto;
+  font-size: 11px;
+  flex: 1;
+  margin: 0;
+  user-select: all;
+}
+
+/* Preview completion is transient and never changes the editor's geometry. */
+.preview-ready-toast {
+  position: fixed;
+  right: 14px;
+  bottom: 14px;
+  z-index: 80;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: min(390px, calc(100vw - 28px));
+  padding: 10px;
+  border: 1px solid color-mix(in srgb, var(--success) 55%, var(--line));
+  border-radius: var(--r-lg);
+  background: var(--chrome-raised);
+  color: var(--chrome-ink);
+  box-shadow: var(--shadow-m);
+  animation: preview-toast-arrive 180ms ease-out both;
+}
+.preview-ready-toast > div {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+}
+.preview-ready-toast strong {
+  font-size: 12px;
+}
+.preview-ready-toast > div > span {
+  overflow: hidden;
+  color: var(--chrome-ink-soft);
+  font-size: 9px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.preview-ready-mark {
+  display: grid;
+  width: 24px;
+  height: 24px;
+  flex: none;
+  place-items: center;
+  border-radius: var(--r-pill);
+  background: color-mix(in srgb, var(--success) 16%, var(--surface));
+  color: var(--success);
+  font-weight: 700;
+}
+
+@keyframes preview-toast-arrive {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

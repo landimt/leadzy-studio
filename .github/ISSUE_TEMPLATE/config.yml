@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security report
+    url: https://github.com/landimt/leadzy-studio/security/advisories/new
+    about: Report vulnerabilities privately instead of opening a public issue.
+  - name: Leadzy
+    url: https://leadzy.com.br
+    about: Commercial licensing and company contact.

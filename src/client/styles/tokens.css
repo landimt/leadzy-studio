@@ -1,0 +1,155 @@
+/* Leadzy brand tokens — values from leadzy-website-v4 globals.css. Never
+   invent colors: change them there first, mirror here. */
+:root {
+  --pink: #e5388c;
+  --pink-soft: #fce1ec;
+  --pink-deep: #8e1b4e;
+  --coral: #f5764e;
+  --ai: #7c5cff;
+  --success: #27b23c;
+  --warn: #f99e00;
+  --danger: #ef345a;
+  --ink: #171310;
+  --ink-soft: #5a1730;
+  --paper: #f3efe9;
+  --surface: #faf7f2;
+  --line: #e2d8cd;
+  --font-body: 'Inter', -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-data: 'Space Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+  /* Warm dark ramp. Consumed only by the dark theme's role bindings below —
+     listed here because the palette is the one place a literal is allowed. */
+  --warm-950: #17130f;
+  --warm-900: #1d1916;
+  --warm-850: #241e19;
+  --warm-800: #2a241f;
+  --warm-700: #3a322b;
+  --warm-600: #55483c;
+  --warm-500: #8a7c72;
+  --warm-300: #b9a89c;
+  --warm-100: #e8e0d8;
+
+  /* Deliberately theme-independent: these sit on top of, or behind, a video
+     frame. A playhead over footage is white in both themes, and the letterbox
+     behind a frame is black in both — the theme has no say over the image. */
+  --on-accent: #fff;
+  --on-media: #fff;
+  --media-void: #000;
+  --scrim: #101010;
+}
+
+/* Semantic roles. Components reference these, never the raw palette above:
+   changing a role re-skins the app, changing a palette value is a brand change
+   that has to land in leadzy-website-v4 first. */
+:root {
+  /* One accent for everything the user drives — primary action, selection,
+     focus, toggle-on. Competing accents in the same toolbar read as three
+     unrelated apps stitched together. */
+  --accent: var(--pink);
+  --accent-hover: var(--pink-deep);
+  /* Filled surface under white text. Plain --pink is 3.98:1 against var(--on-accent),
+     below the 4.5:1 AA floor at our 13px control size. */
+  --accent-solid: var(--pink-deep);
+  --accent-wash: var(--pink-soft);
+  --accent-ink: var(--pink-deep);
+
+  /* Agent-authored content and the efeitos/camadas track family. */
+  --agent: var(--ai);
+  --track-effect: var(--ai);
+  --track-overlay: var(--warn);
+  /* Fill and edge need different values on paper: #f99e00 as a 1.5px
+     outline measured 1.85:1 against the track, under the 3:1 floor.
+     The dark theme keeps the pure hue — there it already clears it. */
+  --track-overlay-edge: color-mix(in srgb, var(--warn) 62%, var(--ink));
+  --track-base: var(--pink);
+
+  /* Data visualisation only. Never paints a control. */
+  --data-audio: var(--coral);
+
+  /* The snap guide stays purple while the snap toggle is --accent: the playhead
+     is already --accent, and two pink vertical lines overlapping are
+     indistinguishable mid-drag. */
+  --snap-guide: var(--ai);
+
+  /* Tool surfaces: menubar, toolbars, timeline, track heads. These follow the
+     theme like everything else — light mode is light, including the editor.
+     Only the bindings change per theme; no component ever names a colour. */
+  --chrome-bg: var(--paper);
+  --chrome-surface: var(--surface);
+  --chrome-raised: var(--surface);
+  --chrome-line: var(--line);
+  --chrome-line-soft: color-mix(in srgb, var(--line) 55%, transparent);
+  --chrome-border-idle: var(--line);
+  --chrome-ink: var(--ink);
+  --chrome-ink-soft: var(--ink-soft);
+  --chrome-ink-faint: color-mix(in srgb, var(--ink) 65%, var(--paper));
+  --chrome-hover: color-mix(in srgb, var(--ink) 8%, transparent);
+
+  --ink-muted: color-mix(in srgb, var(--ink) 60%, var(--paper));
+
+  /* Tint weight is theme-dependent: a wash calibrated to read on the warm dark
+     disappears on paper. These feed the color-mix() percentages below, so a
+     block keeps the same hue and only its weight changes with the theme. */
+  --tint-soft: 24%;
+  --tint-medium: 34%;
+  --tint-strong: 46%;
+
+  --shadow-s: 0 2px 6px color-mix(in srgb, var(--media-void) 10%, transparent);
+  --shadow-m: 0 8px 24px color-mix(in srgb, var(--media-void) 14%, transparent);
+  --shadow-l: 0 16px 40px color-mix(in srgb, var(--media-void) 18%, transparent);
+
+  /* Control geometry. Every button/input picks a named radius and height so a
+     row of controls lines up instead of drifting 1-3px per component. */
+  --r-sm: 6px;
+  --r-md: 8px;
+  --r-lg: 10px;
+  --r-pill: 999px;
+  --track-head-h: 16px;
+  --track-icon-size: 0.6875rem;
+  --timeline-track-control-size: 1.25rem;
+  --timeline-track-header-w: 5.5rem;
+  --timeline-zero-gutter: 0.25rem;
+  --h-xs: 1.5rem;
+  --h-sm: 1.625rem;
+  --h-md: 1.75rem;
+  --h-lg: 2rem;
+
+  /* Structural geometry. */
+  --pane-divider-size: 0.5rem;
+}
+
+:root[data-theme='dark'] {
+  --ink: #ece5dd;
+  --ink-soft: #d0a8ba;
+  --paper: #141110;
+  --surface: #1d1916;
+  --line: #352d27;
+  --pink-soft: #3a2230;
+
+  --chrome-bg: var(--warm-950);
+  --chrome-surface: var(--warm-900);
+  --chrome-raised: var(--warm-850);
+  --chrome-line: var(--warm-700);
+  --chrome-line-soft: var(--warm-800);
+  --chrome-border-idle: var(--warm-600);
+  --chrome-ink: var(--warm-100);
+  --chrome-ink-soft: var(--warm-300);
+  --chrome-ink-faint: var(--warm-500);
+  --chrome-hover: color-mix(in srgb, var(--warm-100) 14%, transparent);
+
+  --ink-muted: color-mix(in srgb, var(--ink) 42%, var(--paper));
+
+  --tint-soft: 14%;
+  --tint-medium: 20%;
+  --tint-strong: 28%;
+
+  --track-overlay-edge: var(--track-overlay);
+
+  /* A dark UI needs a heavier shadow to read at all. */
+  --shadow-s: 0 2px 6px color-mix(in srgb, var(--media-void) 40%, transparent);
+  --shadow-m: 0 8px 24px color-mix(in srgb, var(--media-void) 50%, transparent);
+  --shadow-l: 0 16px 40px color-mix(in srgb, var(--media-void) 60%, transparent);
+}
+:root[data-theme='dark'] .library-chip {
+  color: var(--accent);
+}

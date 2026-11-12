@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+    <!--
+      V8 compiles JavaScript at runtime, so the main process cannot run under
+      the hardened runtime without this. Chromium grants the same single
+      entitlement to its browser process.
+
+      @electron/osx-sign's default for every non-helper file also grants
+      camera, microphone, bluetooth, USB, print and location. This editor
+      requests none of them, which is why cleanMacTemplate in forge.config.cjs
+      strips their usage strings from Info.plist — an entitlement without its
+      usage string is a privilege the app can never legally exercise. Adding a
+      capability means editing both places, or it fails silently.
+    -->
+    <key>com.apple.security.cs.allow-jit</key>
+    <true/>
+  </dict>
+</plist>

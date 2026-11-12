@@ -1,0 +1,81 @@
+/* --- floating background job status --- */
+.statusbar {
+  position: fixed;
+  z-index: 70;
+  bottom: max(14px, env(safe-area-inset-bottom));
+  left: max(14px, env(safe-area-inset-left));
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  width: max-content;
+  max-width: min(24rem, calc(100vw - 28px));
+  min-height: 32px;
+  padding: 4px 9px 4px 5px;
+  border: 1px solid color-mix(in srgb, var(--line) 88%, transparent);
+  border-radius: var(--r-lg);
+  background: color-mix(in srgb, var(--surface) 94%, transparent);
+  box-shadow: var(--shadow-m);
+  pointer-events: none;
+  backdrop-filter: blur(14px);
+  animation: statusbar-enter 160ms ease-out;
+}
+.statusbar-indicator {
+  display: grid;
+  width: 20px;
+  height: 20px;
+  flex: 0 0 20px;
+  place-items: center;
+  border-radius: var(--r-md);
+  color: var(--accent-ink);
+  background: color-mix(in srgb, var(--accent) 10%, var(--surface));
+}
+.statusbar-indicator svg {
+  width: 12px;
+  height: 12px;
+  animation: statusbar-spin 900ms linear infinite;
+}
+.statusbar-copy {
+  display: flex;
+  min-width: 0;
+  align-items: baseline;
+  gap: 6px;
+  line-height: 1.2;
+}
+.statusbar-copy strong {
+  flex: none;
+  color: var(--ink);
+  font-size: 10.5px;
+  font-weight: 600;
+}
+.statusbar .progress {
+  font-family: var(--font-data);
+  color: var(--ink-soft);
+  font-size: 9.5px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+@keyframes statusbar-enter {
+  from {
+    opacity: 0;
+    transform: translateY(5px) scale(0.98);
+  }
+}
+@keyframes statusbar-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .statusbar {
+    animation: none;
+  }
+  .statusbar-indicator svg {
+    animation-duration: 1.8s;
+  }
+}
+.banner pre,
+input,
+textarea {
+  user-select: text;
+}

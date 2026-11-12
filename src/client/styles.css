@@ -1,0 +1,22 @@
+/* Hand-written editor styles, one file per surface. Order matters: this list
+   is the cascade, and index.css loads the whole set into the `legacy` layer. */
+@import './styles/tokens.css';
+@import './styles/debug.css';
+@import './styles/launcher.css';
+@import './styles/base.css';
+@import './styles/shadcn.css';
+@import './styles/menubar.css';
+@import './styles/banners.css';
+@import './styles/startup.css';
+@import './styles/layout.css';
+@import './styles/player.css';
+@import './styles/inspector.css';
+@import './styles/effects.css';
+@import './styles/transcript.css';
+@import './styles/timeline.css';
+@import './styles/block-toolbar.css';
+@import './styles/audio-station.css';
+@import './styles/jobs.css';
+@import './styles/scrollbars.css';
+@import './styles/dock.css';
+@import './styles/export.css';

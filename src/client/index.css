@@ -1,0 +1,94 @@
+/* Tailwind + shadcn entry. The cascade order below is the whole trick of this
+   migration: `legacy` sits between Tailwind's preflight and its utilities, so
+   the 45KB of hand-written CSS still beats the reset (controls keep their look)
+   while any migrated component's utility classes still beat the legacy rule
+   they are replacing. Delete a legacy block only once its component is ported. */
+@layer theme, base, legacy, components, utilities;
+
+@import 'tailwindcss';
+@import './styles.css' layer(legacy);
+
+/* The app toggles `data-theme` on <html>, not the `.dark` class Tailwind
+   expects. */
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
+/* shadcn's semantic names mapped onto the Leadzy roles rather than duplicated.
+   `inline` matters: utilities compile to the referenced var (`bg-background` ->
+   `var(--paper)`), so a component picks up whichever theme is active. */
+@theme inline {
+  --color-background: var(--paper);
+  --color-foreground: var(--ink);
+
+  --color-card: var(--surface);
+  --color-card-foreground: var(--ink);
+  --color-popover: var(--surface);
+  --color-popover-foreground: var(--ink);
+
+  --color-primary: var(--accent-solid);
+  --color-primary-foreground: var(--on-accent);
+  --color-secondary: var(--accent-wash);
+  --color-secondary-foreground: var(--accent-ink);
+
+  --color-muted: var(--paper);
+  --color-muted-foreground: var(--ink-soft);
+  --color-accent: var(--accent-wash);
+  --color-accent-foreground: var(--accent-ink);
+
+  --color-destructive: var(--danger);
+  --color-destructive-foreground: var(--on-accent);
+  --color-success: var(--success);
+  --color-warning: var(--warn);
+  --color-agent: var(--agent);
+
+  --color-border: var(--line);
+  --color-input: var(--line);
+  --color-ring: var(--accent);
+  /* The live pink as a named utility. `primary` is the deep pink that
+     carries white text, and `accent` means the wash in shadcn's
+     vocabulary — neither is the right name for a slider fill or an
+     active toggle. */
+  --color-brand: var(--accent);
+
+  --font-sans: var(--font-body);
+  --font-mono: var(--font-data);
+
+  /* Dense editor type roles. Naming these keeps the 10/11px steps from
+     becoming one-off arbitrary utilities across every toolbar. */
+  --text-micro: 0.625rem;
+  --text-compact: 0.6875rem;
+  --tracking-label: 0.08em;
+
+  --radius-sm: var(--r-sm);
+  --radius-md: var(--r-md);
+  --radius-lg: var(--r-lg);
+}
+
+/* `type-*` deliberately avoids Tailwind Merge's `text-*` color group, so a
+   compact font size never drops `text-secondary-foreground` from a button. */
+@utility type-micro {
+  font-size: var(--text-micro);
+}
+
+@utility type-compact {
+  font-size: var(--text-compact);
+}
+
+:root {
+  /* shadcn components that hard-code var(--radius) instead of a utility */
+  --radius: var(--r-md);
+}
+
+/* Tailwind v4 defaults every border to `currentColor`, so a shadcn component
+   that says `border` without `border-border` paints it in the text colour —
+   that is the black outline on dialogs, menus and the slider thumb. This is the
+   base rule `shadcn init` writes; it was missing because the primitives were
+   added without running init. */
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-border);
+  }
+}

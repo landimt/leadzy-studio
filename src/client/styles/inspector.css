@@ -1,0 +1,377 @@
+/* --- inspector --- */
+.inspector {
+  width: 100%;
+  max-width: 320px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 12px;
+}
+.inspector-heading,
+.inspector-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.inspector-heading {
+  font-weight: 700;
+}
+.inspector-time,
+.inspector-asset {
+  font-family: var(--font-data);
+  font-size: 10px;
+  color: var(--ink-soft);
+}
+/* Running sentences stay in the UI face — Space Mono is for numbers only. */
+.inspector-hint {
+  font-size: 10.5px;
+  line-height: 1.5;
+  color: var(--ink-muted);
+}
+.inspector-asset {
+  padding: 7px 8px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.background-inspector {
+  gap: 9px;
+}
+.background-kind-label {
+  color: var(--ink-muted);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.background-control-row {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.background-control-row > label:first-child {
+  flex: none;
+  color: var(--ink-soft);
+  font-size: 10px;
+  font-weight: 600;
+}
+.background-color-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--ink-soft);
+  font-family: var(--font-data);
+  font-size: 10px;
+}
+.background-color-control input {
+  width: 28px;
+  height: 24px;
+  padding: 2px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--paper);
+  cursor: pointer;
+}
+.background-asset-name {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--ink-soft);
+  font-family: var(--font-data);
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.background-asset-summary {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+}
+.background-asset-summary .background-asset-name {
+  max-width: 135px;
+}
+.background-divider {
+  height: 1px;
+  background: var(--line);
+}
+.background-segment {
+  flex: none;
+}
+.background-presets {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+}
+.background-presets button {
+  display: flex;
+  min-width: 0;
+  height: 42px;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 4px 5px;
+  border: 0;
+  border-right: 1px solid var(--line);
+  border-radius: 0;
+  background: transparent;
+  color: var(--ink-soft);
+  font-size: 9px;
+  font-weight: 600;
+  line-height: 1.1;
+}
+.background-presets button:last-child {
+  border-right: 0;
+}
+.background-presets button:hover {
+  background: var(--accent-wash);
+  color: var(--ink);
+}
+.background-presets button[aria-pressed='true'] {
+  background: var(--accent-wash);
+  color: var(--ink);
+}
+.background-presets button:focus-visible,
+.background-segment button:focus-visible {
+  position: relative;
+  z-index: 1;
+  outline: 2px solid var(--ring);
+  outline-offset: -2px;
+}
+.background-preset-glyph {
+  position: relative;
+  width: 16px;
+  height: 22px;
+  flex: none;
+  border: 1px solid currentcolor;
+  border-radius: 3px;
+  opacity: 0.72;
+}
+.background-preset-glyph::after {
+  position: absolute;
+  right: 2px;
+  left: 2px;
+  height: 7px;
+  border-radius: 1px;
+  background: currentcolor;
+  content: '';
+}
+.background-preset-glyph.is-center::after {
+  top: 7px;
+}
+.background-preset-glyph.is-top::after {
+  top: 2px;
+}
+.background-preset-glyph.is-bottom::after {
+  bottom: 2px;
+}
+.background-cell-inputs {
+  padding-top: 1px;
+}
+.background-footer {
+  align-items: flex-end;
+  padding-top: 1px;
+}
+.background-footer [data-slot='button'] {
+  margin-left: auto;
+}
+.background-footer .inspector-hint {
+  max-width: 165px;
+}
+.inspector-footer .primary {
+  flex: none;
+  padding: 6px 10px;
+}
+.with-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.effect-control {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.effect-control-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.effect-control output {
+  font-family: var(--font-data);
+  font-size: 11px;
+  color: var(--track-effect);
+}
+.effect-control input[type='range'] {
+  width: 100%;
+  accent-color: var(--track-effect);
+}
+.library-save-done {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--success);
+}
+.library-save-form {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper);
+}
+.library-save-form select {
+  font-family: var(--font-body);
+  font-size: 12px;
+  padding: 6px 8px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--surface);
+  color: var(--ink);
+}
+.library-save-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+}
+.library-save-actions button {
+  font-size: 11px;
+  padding: 4px 10px;
+}
+.subtitle-control,
+.subtitle-limit-row {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.subtitle-library-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+/* Same selection language as the take filmstrips: quiet card, half-lit border
+   on hover, accent border + wash when chosen. */
+.subtitle-library-card {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 6px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--paper);
+  text-align: left;
+  transition: border-color 0.15s;
+}
+.subtitle-library-card:hover {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--line));
+}
+.subtitle-library-card.active {
+  border-color: var(--accent);
+  background: var(--accent-wash);
+}
+.subtitle-library-preview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  border-radius: 6px;
+  background: var(--media-void);
+  overflow: hidden;
+}
+.subtitle-library-preview span {
+  font-size: 13px;
+  line-height: 1;
+  white-space: nowrap;
+}
+.subtitle-library-label {
+  font-size: 10px;
+  font-family: var(--font-data);
+  color: var(--ink-soft);
+}
+.subtitle-library-card.active .subtitle-library-label {
+  color: var(--ink);
+}
+.inspector-inline-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+.subtitle-limit-inputs {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+}
+.subtitle-limit-inputs label {
+  display: grid;
+  grid-template-columns: auto 42px;
+  align-items: center;
+  gap: 5px;
+  font-size: 10.5px;
+  color: var(--ink-soft);
+}
+/* The shadcn Input carries its own fixed height; without matching height and
+   zero block padding here the digits render clipped at the top. */
+.subtitle-limit-inputs input {
+  width: 42px;
+  height: 24px;
+  padding: 0 4px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-data);
+  font-size: 11px;
+  text-align: center;
+}
+.subtitle-limit-inputs input::-webkit-inner-spin-button {
+  appearance: none;
+}
+.layer-cell-inputs {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+}
+.layer-cell-inputs label {
+  display: grid;
+  grid-template-columns: auto 48px;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-data);
+  font-size: 10px;
+}
+.layer-cell-inputs input {
+  width: 48px;
+  padding: 5px 4px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-data);
+  font-size: 11px;
+  text-align: center;
+}
+.library-variables {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.library-variables label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  font-size: 11px;
+  color: var(--ink-soft);
+}

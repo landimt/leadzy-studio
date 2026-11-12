@@ -1,0 +1,66 @@
+/* --- scrollbars: thin, rounded, brand-tinted (dark variant on the timeline) --- */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) transparent;
+}
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--line);
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent);
+}
+.timeline {
+  scrollbar-color: var(--chrome-line) transparent;
+}
+.timeline::-webkit-scrollbar-thumb {
+  background: var(--chrome-line);
+}
+.timeline::-webkit-scrollbar-thumb:hover {
+  background: var(--accent);
+}
+
+@media (max-width: 620px) {
+  .startup-screen {
+    grid-template-rows: auto 1fr auto;
+    padding: 18px;
+  }
+  .startup-workspace {
+    grid-template-columns: 34% 1fr;
+    grid-template-rows: 1fr 66px;
+  }
+  .startup-copy {
+    gap: 10px;
+    padding: 18px;
+  }
+  .startup-brand span {
+    display: none;
+  }
+  .preview-ready-toast > div > span {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .preview-ready-toast,
+  .startup-workspace,
+  .startup-progress i {
+    animation: none;
+  }
+  .track,
+  .track-lane,
+  .track .track-collapse-button svg {
+    transition: none;
+  }
+  .startup-progress i {
+    width: 100%;
+    transform: none;
+  }
+}
