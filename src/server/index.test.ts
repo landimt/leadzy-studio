@@ -955,6 +955,81 @@ describe('server routes', { concurrent: false }, () => {
       return { trackId: 'overlays', blockIndex, file: blocks[blockIndex]!.file };
     }
 
+    /**
+     * Subscribes to /api/events, fires `post` only after the connection's
+     * synchronous jobs-snapshot frame (so no terminal event can slip into the
+     * connection gap), and resolves on the bake job's terminal event.
+     */
+    async function bakeTerminalOf(
+      post: () => Promise<Response>,
+    ): Promise<{ state: string; error?: string }> {
+      const controller = new AbortController();
+      const timer = setTimeout(() => {
+        controller.abort();
+      }, 8000);
+      try {
+        const res = await fetch(`${baseUrl}/api/events`, { signal: controller.signal });
+        if (res.body === null) throw new Error('SSE stream has no body');
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+        let posted = false;
+        for (;;) {
+          const { value, done } = await reader.read();
+          if (done) throw new Error('SSE stream ended without a terminal bake event');
+          buffer += decoder.decode(value, { stream: true });
+          const frames = buffer.split('\n\n');
+          buffer = frames.pop() ?? '';
+          for (const frame of frames) {
+            for (const line of frame.split('\n')) {
+              if (!line.startsWith('data: ')) continue;
+              const event = JSON.parse(line.slice(6)) as {
+                kind?: string;
+                type?: string;
+                state?: string;
+                error?: string;
+              };
+              if (event.kind === 'jobs-snapshot' && !posted) {
+                posted = true;
+                const response = await post();
+                expect(response.status).toBe(200);
+              }
+              if (
+                event.kind === 'job' &&
+                event.type === 'library-overlay' &&
+                (event.state === 'done' || event.state === 'error')
+              ) {
+                return {
+                  state: event.state,
+                  ...(event.error !== undefined ? { error: event.error } : {}),
+                };
+              }
+            }
+          }
+        }
+      } finally {
+        clearTimeout(timer);
+        controller.abort();
+      }
+    }
+
+    /**
+     * A bake that must succeed. The document changes before the job releases
+     * its slot, so a test that only polls the document can start its next bake
+     * while this one still holds it and get a 409. Waiting for the terminal
+     * event closes that window.
+     */
+    async function bake(body: Record<string, unknown>): Promise<void> {
+      const terminal = await bakeTerminalOf(() =>
+        fetch(`${baseUrl}/api/jobs/library-overlay`, {
+          method: 'POST',
+          headers: JSON_HEADERS,
+          body: JSON.stringify(body),
+        }),
+      );
+      expect(terminal).toEqual({ state: 'done' });
+    }
+
     it('import copies the template under the fixed name and stamps the resolved defaults', async () => {
       const { blockIndex } = await importParametric();
 
@@ -1093,16 +1168,8 @@ describe('server routes', { concurrent: false }, () => {
       renderLibraryOverlayMock.mockResolvedValue(ok(baked));
 
       const variables = { HEADLINE: 'Última chance', PRICE: 'R$ 49' };
-      const res = await fetch(`${baseUrl}/api/jobs/library-overlay`, {
-        method: 'POST',
-        headers: JSON_HEADERS,
-        body: JSON.stringify({ ...target, variables }),
-      });
-      expect(res.status).toBe(200);
+      await bake({ ...target, variables });
 
-      await expect
-        .poll(async () => (await overlayBlocks())[target.blockIndex]?.file, { timeout: 5000 })
-        .toBe(baked);
       expect((await overlayBlocks())[target.blockIndex]).toEqual({
         ...before,
         file: baked,
@@ -1128,16 +1195,8 @@ describe('server routes', { concurrent: false }, () => {
         PRICE: 'R$ 39',
         DURATION_SECONDS: '3.2',
       };
-      const res = await fetch(`${baseUrl}/api/jobs/library-overlay`, {
-        method: 'POST',
-        headers: JSON_HEADERS,
-        body: JSON.stringify({ ...target, variables }),
-      });
-      expect(res.status).toBe(200);
+      await bake({ ...target, variables });
 
-      await expect
-        .poll(async () => (await overlayBlocks())[target.blockIndex]?.file, { timeout: 5000 })
-        .toBe(baked);
       expect((await overlayBlocks())[target.blockIndex]).toEqual({
         ...before,
         file: baked,
@@ -1193,16 +1252,8 @@ describe('server routes', { concurrent: false }, () => {
       renderLibraryOverlayMock.mockResolvedValueOnce(ok(baked));
 
       const variables = { HEADLINE: 'Pergunta', HOLD_SECONDS: '3' };
-      const res = await fetch(`${baseUrl}/api/jobs/library-overlay`, {
-        method: 'POST',
-        headers: JSON_HEADERS,
-        body: JSON.stringify({ ...target, variables }),
-      });
-      expect(res.status).toBe(200);
+      await bake({ ...target, variables });
 
-      await expect
-        .poll(async () => (await overlayBlocks())[target.blockIndex]?.file, { timeout: 5000 })
-        .toBe(baked);
       expect((await overlayBlocks())[target.blockIndex]).toEqual({
         ...before,
         file: baked,
@@ -1248,15 +1299,8 @@ describe('server routes', { concurrent: false }, () => {
       // First bake gives the block a file no other block shares.
       const uniqueFile = `edit/assets/library/${PARAMETRIC_ID}/bake-0000aaaa1111.webm`;
       renderLibraryOverlayMock.mockResolvedValueOnce(ok(uniqueFile));
-      const first = await fetch(`${baseUrl}/api/jobs/library-overlay`, {
-        method: 'POST',
-        headers: JSON_HEADERS,
-        body: JSON.stringify({ ...target, variables: { HEADLINE: 'Base', PRICE: 'R$ 9' } }),
-      });
-      expect(first.status).toBe(200);
-      await expect
-        .poll(async () => (await overlayBlocks())[target.blockIndex]?.file, { timeout: 5000 })
-        .toBe(uniqueFile);
+      await bake({ ...target, variables: { HEADLINE: 'Base', PRICE: 'R$ 9' } });
+      expect((await overlayBlocks())[target.blockIndex]?.file).toBe(uniqueFile);
 
       // A second library block with a DIFFERENT file on the same track: the
       // relocation must key on the file, not on "any library block".
@@ -1271,21 +1315,14 @@ describe('server routes', { concurrent: false }, () => {
       );
       const bystanderFile = `edit/assets/library/${PARAMETRIC_ID}/bake-0000ffff9999.webm`;
       renderLibraryOverlayMock.mockResolvedValueOnce(ok(bystanderFile));
-      const bystanderBake = await fetch(`${baseUrl}/api/jobs/library-overlay`, {
-        method: 'POST',
-        headers: JSON_HEADERS,
-        body: JSON.stringify({
-          trackId: target.trackId,
-          blockIndex: bystanderIndex,
-          file: (await overlayBlocks())[bystanderIndex]?.file,
-          at: 9,
-          variables: { HEADLINE: 'Vizinha', PRICE: 'R$ 3' },
-        }),
+      await bake({
+        trackId: target.trackId,
+        blockIndex: bystanderIndex,
+        file: (await overlayBlocks())[bystanderIndex]?.file,
+        at: 9,
+        variables: { HEADLINE: 'Vizinha', PRICE: 'R$ 3' },
       });
-      expect(bystanderBake.status).toBe(200);
-      await expect
-        .poll(async () => (await overlayBlocks())[bystanderIndex]?.file, { timeout: 5000 })
-        .toBe(bystanderFile);
+      expect((await overlayBlocks())[bystanderIndex]?.file).toBe(bystanderFile);
 
       // Second bake: mid-render, a new element lands at the FRONT of the
       // track, shifting the target from blockIndex to blockIndex + 1.
@@ -1312,86 +1349,21 @@ describe('server routes', { concurrent: false }, () => {
       });
 
       const variables = { HEADLINE: 'Movida', PRICE: 'R$ 2' };
-      const res = await fetch(`${baseUrl}/api/jobs/library-overlay`, {
-        method: 'POST',
-        headers: JSON_HEADERS,
-        body: JSON.stringify({
-          trackId: target.trackId,
-          blockIndex: target.blockIndex,
-          file: uniqueFile,
-          variables,
-        }),
+      await bake({
+        trackId: target.trackId,
+        blockIndex: target.blockIndex,
+        file: uniqueFile,
+        variables,
       });
-      expect(res.status).toBe(200);
 
-      await expect
-        .poll(async () => (await overlayBlocks())[target.blockIndex + 1]?.file, { timeout: 5000 })
-        .toBe(baked);
       const blocks = await overlayBlocks();
+      expect(blocks[target.blockIndex + 1]?.file).toBe(baked);
       expect(blocks[0]?.file).toBe('edit/assets/decoy.webm');
       expect(blocks[target.blockIndex + 1]?.library).toEqual({
         item: PARAMETRIC_ID,
         variables,
       });
     });
-
-    /**
-     * Subscribes to /api/events, fires `post` only after the connection's
-     * synchronous jobs-snapshot frame (so no terminal event can slip into the
-     * connection gap), and resolves on the bake job's terminal event.
-     */
-    async function bakeTerminalOf(
-      post: () => Promise<Response>,
-    ): Promise<{ state: string; error?: string }> {
-      const controller = new AbortController();
-      const timer = setTimeout(() => {
-        controller.abort();
-      }, 8000);
-      try {
-        const res = await fetch(`${baseUrl}/api/events`, { signal: controller.signal });
-        if (res.body === null) throw new Error('SSE stream has no body');
-        const reader = res.body.getReader();
-        const decoder = new TextDecoder();
-        let buffer = '';
-        let posted = false;
-        for (;;) {
-          const { value, done } = await reader.read();
-          if (done) throw new Error('SSE stream ended without a terminal bake event');
-          buffer += decoder.decode(value, { stream: true });
-          const frames = buffer.split('\n\n');
-          buffer = frames.pop() ?? '';
-          for (const frame of frames) {
-            for (const line of frame.split('\n')) {
-              if (!line.startsWith('data: ')) continue;
-              const event = JSON.parse(line.slice(6)) as {
-                kind?: string;
-                type?: string;
-                state?: string;
-                error?: string;
-              };
-              if (event.kind === 'jobs-snapshot' && !posted) {
-                posted = true;
-                const response = await post();
-                expect(response.status).toBe(200);
-              }
-              if (
-                event.kind === 'job' &&
-                event.type === 'library-overlay' &&
-                (event.state === 'done' || event.state === 'error')
-              ) {
-                return {
-                  state: event.state,
-                  ...(event.error !== undefined ? { error: event.error } : {}),
-                };
-              }
-            }
-          }
-        }
-      } finally {
-        clearTimeout(timer);
-        controller.abort();
-      }
-    }
 
     it('preserves variables changed by another edit while the bake is rendering', async () => {
       const target = await importParametric();
@@ -1487,21 +1459,14 @@ describe('server routes', { concurrent: false }, () => {
         { blockIndex: secondIndex, at: secondAt },
       ]) {
         renderLibraryOverlayMock.mockResolvedValueOnce(ok(sharedFile));
-        const res = await fetch(`${baseUrl}/api/jobs/library-overlay`, {
-          method: 'POST',
-          headers: JSON_HEADERS,
-          body: JSON.stringify({
-            trackId: first.trackId,
-            blockIndex: twin.blockIndex,
-            file: (await overlayBlocks())[twin.blockIndex]?.file,
-            at: twin.at,
-            variables,
-          }),
+        await bake({
+          trackId: first.trackId,
+          blockIndex: twin.blockIndex,
+          file: (await overlayBlocks())[twin.blockIndex]?.file,
+          at: twin.at,
+          variables,
         });
-        expect(res.status).toBe(200);
-        await expect
-          .poll(async () => (await overlayBlocks())[twin.blockIndex]?.file, { timeout: 5000 })
-          .toBe(sharedFile);
+        expect((await overlayBlocks())[twin.blockIndex]?.file).toBe(sharedFile);
       }
       return {
         trackId: first.trackId,
@@ -1652,15 +1617,8 @@ describe('server routes', { concurrent: false }, () => {
 
       const baked = `edit/assets/library/${PARAMETRIC_ID}/bake-0000deadbeef.webm`;
       renderLibraryOverlayMock.mockResolvedValue(ok(baked));
-      const res = await fetch(`${baseUrl}/api/jobs/library-overlay`, {
-        method: 'POST',
-        headers: JSON_HEADERS,
-        body: JSON.stringify({ ...target, variables: { HEADLINE: 'Outra', PRICE: 'R$ 1' } }),
-      });
-      expect(res.status).toBe(200);
-      await expect
-        .poll(async () => (await overlayBlocks())[target.blockIndex]?.file, { timeout: 5000 })
-        .toBe(baked);
+      await bake({ ...target, variables: { HEADLINE: 'Outra', PRICE: 'R$ 1' } });
+      expect((await overlayBlocks())[target.blockIndex]?.file).toBe(baked);
 
       const after = await fetch(`${baseUrl}/api/edit`);
       const { doc: finalDoc } = (await after.json()) as { doc: EditDoc };
