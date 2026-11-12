@@ -189,6 +189,11 @@ Three things that already broke this project and will break it again:
 - Modals go through `StudioDialog` (`src/client/components/StudioDialog.tsx`) —
   the close button, the header, the error and the footer order are decided in
   one place.
+- Feature panels reuse `src/client/components/ui` for Select, Input, Checkbox,
+  Slider and Tabs, and editor/tool tab strips share `components/PanelTabs`; do
+  not substitute native controls. `Exibir → Layout → Compacto` keeps the
+  preview on the left, all tools in one workspace and the timeline below;
+  layout preferences never change the video document.
 - Functional motion only: playhead/existing transitions, toast enter/leave and
   the startup screen's progress sweep. All of it respects
   `prefers-reduced-motion`. No gradients, glow, glass or animated ornamental
